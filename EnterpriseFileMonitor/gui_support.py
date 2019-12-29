@@ -5,6 +5,7 @@
 #  in conjunction with Tcl version 8.6
 #    Dec 28, 2019 04:45:04 PM CET  platform: Windows NT
 #    Dec 28, 2019 05:44:38 PM CET  platform: Windows NT
+#    Dec 29, 2019 07:09:48 PM CET  platform: Windows NT
 
 import sys
 
@@ -26,6 +27,7 @@ import watchdog.observers
 import watchdog.events
 import datetime
 import threading
+import messages
 
 class dirStatistics(watchdog.events.FileSystemEventHandler):
     def __init__(self, *args, timespan_seconds = 24*60*60, **kwargs):
@@ -78,8 +80,14 @@ class dirStatistics(watchdog.events.FileSystemEventHandler):
         
 g_w, g_top_level, g_root = None, None, None
 monitoredDirectory = None
-g_observer = watchdog.observers.Observer()
+g_observer = None
 g_dirStatistics = dirStatistics(timespan_seconds=100)
+
+def StartMonitoring():
+    g_observer.schedule(g_dirStatistics, monitoredDirectory.get(), recursive=True) 
+    g_observer.start()
+    print('gui_support.StartMonitoring')
+    sys.stdout.flush()
 
 def getNumberOfFiles(dir):
     """count the number of files in given dir"""
@@ -94,43 +102,42 @@ def hostnameKeypress(p1):
     sys.stdout.flush()
 
 def selectDirectory():
+    global g_observer
     print('gui_support.selectDirectory')
     dir = tkinter.filedialog.askdirectory()
     monitoredDirectory.set(dir)
     nfFiles = getNumberOfFiles(dir)
     g_w.NumberOfFilesLabel['text'] = str(nfFiles)
+    if g_observer:
+        g_observer.stop()
+        g_observer.join()
+        g_observer = None
     g_dirStatistics.reset()
-    g_observer.stop()
-    g_observer.join()
+    g_observer = watchdog.observers.Observer()
     g_observer.schedule(g_dirStatistics, monitoredDirectory.get(), recursive=True) 
     g_observer.start()
     sys.stdout.flush()
 
-def startMonitoring():
-    print('gui_support.startMonitoring')
-    g_observer.schedule(g_dirStatistics, monitoredDirectory.get(), recursive=True) 
-    g_observer.start()
-    g_root.after(1000, secondTick, g_root)
-    sys.stdout.flush()
-
-def stopMonitoring():
-    print('gui_support.stopMonitoring')
-    g_observer.stop()
-    g_observer.join()
-    sys.stdout.flush()
-
-def secondTick(root):
-    if monitoredDirectory.get:
+def secondsTick(root):
+    if monitoredDirectory.get():
         stats = g_dirStatistics.doStats()
-        g_w.PercentageChangedLabel['text'] = "created=%2.2f, deleted=%2.2f, modified=%2.2f, moved=%2.2f" %stats
-        root.after(1000, secondTick, root)
+        g_w.PercentageChangedLabel['text'] = "created=%2.2f, deleted=%2.2f, moved=%2.2f, modified=%2.2f" %stats
+        msg = messages.interchangeMessage(hostname="test", \
+                                          dir=monitoredDirectory.get(),\
+                                          nfFiles=0,\
+                                          nfCreated=stats[0],\
+                                          nfDeleted=stats[1],\
+                                          nfMoved=stats[2],\
+                                          nfModified=stats[3])
+        print(msg)
+    root.after(1000, secondsTick, root)
 
 def init(top, gui, *args, **kwargs):
     global g_w, g_top_level, g_root
     g_w = gui
     g_top_level = top
     g_root = top
-    g_root.after(1000, secondTick, g_root)
+    g_root.after(1000, secondsTick, g_root)
     
 def destroy_window():
     # Function which closes the window.

@@ -24,9 +24,13 @@
     <Compile Include="EnterpriseFileMonitor.py" />
     <Compile Include="gui.py" />
     <Compile Include="gui_support.py" />
+    <Compile Include="messages\__init__.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gui.tcl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="messages\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
