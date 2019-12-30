@@ -19,7 +19,7 @@ except ImportError:
     import tkinter.ttk as ttk
     py3 = True
 
-import gui_support
+from agent import gui_support
 
 def vp_start_gui():
     '''Starting point when module is the main routine.'''

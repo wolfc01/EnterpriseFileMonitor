@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "EnterpriseFileMonitor", "EnterpriseFileMonitor\EnterpriseFileMonitor.pyproj", "{835DF75A-175E-4D1D-8A5F-600EC177D2C7}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "EnterpriseFileMonitorAgent", "EnterpriseFileMonitor\EnterpriseFileMonitorAgent.pyproj", "{835DF75A-175E-4D1D-8A5F-600EC177D2C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

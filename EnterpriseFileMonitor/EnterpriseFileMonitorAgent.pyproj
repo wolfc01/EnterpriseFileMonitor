@@ -3,13 +3,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>835df75a-175e-4d1d-8a5f-600ec177d2c7</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
-    <StartupFile>EnterpriseFileMonitor.py</StartupFile>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>EnterpriseFileMonitorAgent.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>EnterpriseFileMonitor</Name>
+    <Name>EnterpriseFileMonitorAgent</Name>
     <RootNamespace>EnterpriseFileMonitor</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -21,16 +22,20 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="EnterpriseFileMonitor.py" />
-    <Compile Include="gui.py" />
-    <Compile Include="gui_support.py" />
+    <Compile Include="agent\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="EnterpriseFileMonitorAgent.py" />
+    <Compile Include="agent\gui.py" />
+    <Compile Include="agent\gui_support.py" />
     <Compile Include="messages\__init__.py" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="gui.tcl" />
+    <Content Include="agent\gui.tcl" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="messages\" />
+    <Folder Include="agent\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
