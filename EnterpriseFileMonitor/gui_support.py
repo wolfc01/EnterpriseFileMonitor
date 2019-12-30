@@ -91,7 +91,14 @@ g_sendSocket = None
 
 def getNumberOfFiles(dir):
     """count the number of files in given dir"""
-    return sum([len(files) for _, __, files in os.walk(dir)])
+    allfiles = []
+    for _, __, files in os.walk(dir):
+        allfiles.append(files)
+        if len(allfiles) % 100 == 0:
+            g_w.NumberOfFilesLabel['text'] = str(len(allfiles))
+            g_w.NumberOfFilesLabel.update()
+    g_w.NumberOfFilesLabel['text'] = str(len(allfiles))
+    return len(allfiles)
 
 def set_Tk_var():
     global monitoredDirectory
