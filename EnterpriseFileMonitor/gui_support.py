@@ -6,6 +6,7 @@
 #    Dec 28, 2019 04:45:04 PM CET  platform: Windows NT
 #    Dec 28, 2019 05:44:38 PM CET  platform: Windows NT
 #    Dec 29, 2019 07:09:48 PM CET  platform: Windows NT
+#    Dec 30, 2019 01:35:02 PM CET  platform: Windows NT
 
 import sys
 
@@ -28,6 +29,9 @@ import watchdog.events
 import datetime
 import threading
 import messages
+import socket
+import pickle
+
 
 class dirStatistics(watchdog.events.FileSystemEventHandler):
     def __init__(self, *args, timespan_seconds = 24*60*60, **kwargs):
@@ -80,14 +84,10 @@ class dirStatistics(watchdog.events.FileSystemEventHandler):
         
 g_w, g_top_level, g_root = None, None, None
 monitoredDirectory = None
+sendToAddress = None
 g_observer = None
 g_dirStatistics = dirStatistics(timespan_seconds=100)
-
-def StartMonitoring():
-    g_observer.schedule(g_dirStatistics, monitoredDirectory.get(), recursive=True) 
-    g_observer.start()
-    print('gui_support.StartMonitoring')
-    sys.stdout.flush()
+g_sendSocket = None
 
 def getNumberOfFiles(dir):
     """count the number of files in given dir"""
@@ -96,6 +96,8 @@ def getNumberOfFiles(dir):
 def set_Tk_var():
     global monitoredDirectory
     monitoredDirectory = tk.StringVar()
+    global sendToAddress
+    sendToAddress = tk.StringVar()
 
 def hostnameKeypress(p1):
     print('gui_support.hostnameKeypress')
@@ -130,13 +132,23 @@ def secondsTick(root):
                                           nfMoved=stats[2],\
                                           nfModified=stats[3])
         print(msg)
+        try:
+            g_sendSocket.sendto(pickle.dumps(msg), (sendToAddress.get(), 1234))
+            g_w.MessageLabel['text'] = "Successfully sent message"
+            g_w.MessageLabel['foreground'] ="#000000"
+        except OSError:
+            g_w.MessageLabel['text'] = "Error in address, cannot send to master."
+            g_w.MessageLabel['foreground'] ="#ff0000"
     root.after(1000, secondsTick, root)
 
 def init(top, gui, *args, **kwargs):
-    global g_w, g_top_level, g_root
+    global g_w, g_top_level, g_root, g_sendSocket
     g_w = gui
     g_top_level = top
     g_root = top
+    g_sendSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     g_root.after(1000, secondsTick, g_root)
     
 def destroy_window():
