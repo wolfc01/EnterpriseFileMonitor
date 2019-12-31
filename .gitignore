@@ -1,3 +1,6 @@
 *.pyc
 /.vs/EnterpriseFileMonitor/v16/.suo
 /EnterpriseFileMonitor/*.spec
+/EnterpriseFileMonitor/agent/*.bak1
+/EnterpriseFileMonitor/agent/*.bak2
+/EnterpriseFileMonitor/agent/*.bak3

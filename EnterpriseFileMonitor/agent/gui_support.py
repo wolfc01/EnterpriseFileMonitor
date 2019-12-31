@@ -32,6 +32,7 @@ import messages
 import socket
 import pickle
 
+G_INTERVAL=10*1000 #milliseconds
 
 class dirStatistics(watchdog.events.FileSystemEventHandler):
     def __init__(self, *args, history_periods = 24*60*60, **kwargs):
@@ -76,19 +77,18 @@ class dirStatistics(watchdog.events.FileSystemEventHandler):
                 self._deleted.pop(0)
                 self._modified.pop(0)
                 self._moved.pop(0)
-            ret=sum(self._created) / len(self._created), \
-                   sum(self._deleted) / len(self._deleted), \
-                   sum(self._moved) / len(self._moved), \
-                   sum(self._modified) / len(self._modified), \
-                   self._nfCreated, \
-                   self._nfDeleted, \
-                   self._nfMoved, \
-                   self._nfModified
+            ret=round(sum(self._created) / len(self._created)), \
+                round(sum(self._deleted) / len(self._deleted)), \
+                round(sum(self._moved) / len(self._moved)), \
+                round(sum(self._modified) / len(self._modified)), \
+                self._nfCreated, \
+                self._nfDeleted, \
+                self._nfMoved, \
+                self._nfModified
             self._nfCreated = self._nfDeleted = self._nfModified = self._nfMoved = 0
             return ret
         
 g_w, g_top_level, g_root = None, None, None
-monitoredDirectory = None
 sendToAddress = None
 g_observer = None
 g_dirStatistics = dirStatistics(history_periods=100)
@@ -106,8 +106,6 @@ def getNumberOfFiles(dir):
     return len(allfiles)
 
 def set_Tk_var():
-    global monitoredDirectory
-    monitoredDirectory = tk.StringVar()
     global sendToAddress
     sendToAddress = tk.StringVar()
 
@@ -119,7 +117,7 @@ def selectDirectory():
     global g_observer
     print('gui_support.selectDirectory')
     dir = tkinter.filedialog.askdirectory()
-    monitoredDirectory.set(dir)
+    g_w.DirectoryEntryLabel['text'] = dir
     nfFiles = getNumberOfFiles(dir)
     g_w.NumberOfFilesLabel['text'] = str(nfFiles)
     if g_observer:
@@ -128,17 +126,17 @@ def selectDirectory():
         g_observer = None
     g_dirStatistics.reset()
     g_observer = watchdog.observers.Observer()
-    g_observer.schedule(g_dirStatistics, monitoredDirectory.get(), recursive=True) 
+    g_observer.schedule(g_dirStatistics, g_w.DirectoryEntryLabel['text'], recursive=True) 
     g_observer.start()
     sys.stdout.flush()
 
 def secondsTick(root):
-    if monitoredDirectory.get():
+    if g_w.DirectoryEntryLabel['text']:
         stats = g_dirStatistics.doStats()
-        g_w.PercentageChangedLabel['text'] = "created=%2.2f, deleted=%2.2f, moved=%2.2f, modified=%2.2f" %stats[0:4]
-        g_w.LatestLabel['text'] = "created=%2.2f, deleted=%2.2f, moved=%2.2f, modified=%2.2f" %stats[0:4]
+        g_w.AverageChangedLabel['text'] = "created=%s, deleted=%s, moved=%s, modified=%s" %stats[0:4]
+        g_w.LatestLabel['text'] = "created=%s, deleted=%s, moved=%s, modified=%s" %stats[4:8]
         msg = messages.interchangeMessage(hostname="test", \
-                                          dir=monitoredDirectory.get(),\
+                                          dir=g_w.DirectoryEntryLabel['text'],\
                                           nfFiles=0,\
                                           nfCreated=stats[0],\
                                           nfDeleted=stats[1],\
@@ -152,7 +150,7 @@ def secondsTick(root):
         except OSError:
             g_w.MessageLabel['text'] = "Error in address, cannot send to master."
             g_w.MessageLabel['foreground'] ="#ff0000"
-    root.after(1000, secondsTick, root)
+    root.after(G_INTERVAL, secondsTick, root)
 
 def init(top, gui, *args, **kwargs):
     global g_w, g_top_level, g_root, g_sendSocket
@@ -162,7 +160,7 @@ def init(top, gui, *args, **kwargs):
     g_sendSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    g_root.after(1000, secondsTick, g_root)
+    g_root.after(G_INTERVAL, secondsTick, g_root)
     
 def destroy_window():
     # Function which closes the window.
@@ -173,6 +171,7 @@ def destroy_window():
 if __name__ == '__main__':
     import gui
     gui.vp_start_gui()
+
 
 
 
