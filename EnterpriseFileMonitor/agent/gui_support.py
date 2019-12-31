@@ -109,13 +109,8 @@ def set_Tk_var():
     global sendToAddress
     sendToAddress = tk.StringVar()
 
-def hostnameKeypress(p1):
-    print('gui_support.hostnameKeypress')
-    sys.stdout.flush()
-
 def selectDirectory():
     global g_observer
-    print('gui_support.selectDirectory')
     dir = tkinter.filedialog.askdirectory()
     g_w.DirectoryEntryLabel['text'] = dir
     nfFiles = getNumberOfFiles(dir)
