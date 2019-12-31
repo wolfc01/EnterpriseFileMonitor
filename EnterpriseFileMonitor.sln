@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "EnterpriseFileMonitorAgent", "EnterpriseFileMonitor\EnterpriseFileMonitorAgent.pyproj", "{835DF75A-175E-4D1D-8A5F-600EC177D2C7}"
 EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "EnterpriseFileMonitorManager", "EnterpriseFileMonitor\EnterpriseFileMonitorManager.pyproj", "{039B7DD2-B4C2-4209-B475-498EF10037CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{835DF75A-175E-4D1D-8A5F-600EC177D2C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{835DF75A-175E-4D1D-8A5F-600EC177D2C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{039B7DD2-B4C2-4209-B475-498EF10037CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{039B7DD2-B4C2-4209-B475-498EF10037CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
