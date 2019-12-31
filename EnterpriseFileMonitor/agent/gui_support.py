@@ -34,7 +34,7 @@ import pickle
 
 
 class dirStatistics(watchdog.events.FileSystemEventHandler):
-    def __init__(self, *args, timespan_seconds = 24*60*60, **kwargs):
+    def __init__(self, *args, history_periods = 24*60*60, **kwargs):
         self._nfCreated = 0
         self._nfMoved = 0
         self._nfDeleted = 0
@@ -43,7 +43,7 @@ class dirStatistics(watchdog.events.FileSystemEventHandler):
         self._moved = []
         self._deleted = []
         self._modified = []
-        self._timespan_seconds = timespan_seconds
+        self._timespan_seconds = history_periods
         self._lock = threading.Lock()
         return super().__init__(*args, **kwargs)
     def reset(self):
@@ -65,28 +65,33 @@ class dirStatistics(watchdog.events.FileSystemEventHandler):
             self._nfDeleted = self._nfDeleted + 1 if event.event_type == watchdog.events.EVENT_TYPE_DELETED else self._nfDeleted
             self._nfModified = self._nfModified + 1 if event.event_type == watchdog.events.EVENT_TYPE_MODIFIED else self._nfModified
     def doStats(self):
-        """to be called once per second on average"""
+        """to be called periodically with roughly constant interval time"""
         with self._lock:
             self._created.append(self._nfCreated)
             self._deleted.append(self._nfDeleted)
             self._modified.append(self._nfModified)
             self._moved.append(self._nfMoved)
-            self._nfCreated = self._nfDeleted = self._nfModified = self._nfMoved = 0
             if len(self._created) > self._timespan_seconds:
                 self._created.pop(0)
                 self._deleted.pop(0)
                 self._modified.pop(0)
                 self._moved.pop(0)
-            return sum(self._created) / len(self._created), \
+            ret=sum(self._created) / len(self._created), \
                    sum(self._deleted) / len(self._deleted), \
                    sum(self._moved) / len(self._moved), \
-                   sum(self._modified) / len(self._modified) 
+                   sum(self._modified) / len(self._modified), \
+                   self._nfCreated, \
+                   self._nfDeleted, \
+                   self._nfMoved, \
+                   self._nfModified
+            self._nfCreated = self._nfDeleted = self._nfModified = self._nfMoved = 0
+            return ret
         
 g_w, g_top_level, g_root = None, None, None
 monitoredDirectory = None
 sendToAddress = None
 g_observer = None
-g_dirStatistics = dirStatistics(timespan_seconds=100)
+g_dirStatistics = dirStatistics(history_periods=100)
 g_sendSocket = None
 
 def getNumberOfFiles(dir):
@@ -130,7 +135,8 @@ def selectDirectory():
 def secondsTick(root):
     if monitoredDirectory.get():
         stats = g_dirStatistics.doStats()
-        g_w.PercentageChangedLabel['text'] = "created=%2.2f, deleted=%2.2f, moved=%2.2f, modified=%2.2f" %stats
+        g_w.PercentageChangedLabel['text'] = "created=%2.2f, deleted=%2.2f, moved=%2.2f, modified=%2.2f" %stats[0:4]
+        g_w.LatestLabel['text'] = "created=%2.2f, deleted=%2.2f, moved=%2.2f, modified=%2.2f" %stats[0:4]
         msg = messages.interchangeMessage(hostname="test", \
                                           dir=monitoredDirectory.get(),\
                                           nfFiles=0,\
