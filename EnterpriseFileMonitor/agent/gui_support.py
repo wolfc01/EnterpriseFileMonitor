@@ -138,10 +138,14 @@ def secondsTick(root):
         msg = messages.interchangeMessage(hostname="test", \
                                           dir=g_w.DirectoryEntryLabel['text'],\
                                           nfFiles=0,\
-                                          nfCreated=stats[0],\
-                                          nfDeleted=stats[1],\
-                                          nfMoved=stats[2],\
-                                          nfModified=stats[3])
+                                          nfCreatedAvg=stats[0],\
+                                          nfDeletedAvg=stats[1],\
+                                          nfMovedAvg=stats[2],\
+                                          nfModifiedAvg=stats[3],\
+                                          nfCreatedLatest=stats[4],\
+                                          nfDeletedLatest=stats[5],\
+                                          nfMovedLatest=stats[6],\
+                                          nfModifiedLatest=stats[7])
         print(msg)
         try:
             g_sendSocket.sendto(pickle.dumps(msg), (sendToAddress.get(), 1234))

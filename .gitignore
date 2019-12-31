@@ -4,3 +4,4 @@
 /EnterpriseFileMonitor/agent/*.bak1
 /EnterpriseFileMonitor/agent/*.bak2
 /EnterpriseFileMonitor/agent/*.bak3
+/EnterpriseFileMonitor/messages/__pycache__/*.pyc

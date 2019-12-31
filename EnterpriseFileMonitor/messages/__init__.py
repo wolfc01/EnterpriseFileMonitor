@@ -1,18 +1,32 @@
 """interchange message class for interchanging messages between agents and the enterprise master"""
 
 class interchangeMessage:
-    def __init__(self, *args, hostname = "?", dir = "", nfFiles = 0, nfCreated=0.0, nfDeleted=0.0, nfMoved=0.0, nfModified=0.0, **kwargs):
-        self.nfCreated = nfCreated
-        self.nfDeleted = nfDeleted
-        self.nfMoved = nfMoved
-        self.nfModified = nfModified
+    def __init__(self, *args, hostname = "?", dir = "", nfFiles = 0, \
+        nfCreatedAvg=0, nfDeletedAvg=0, nfMovedAvg=0, nfModifiedAvg=0, \
+        nfCreatedLatest=0, nfDeletedLatest=0, nfMovedLatest=0, nfModifiedLatest=0, \
+        **kwargs):
+        self.nfCreatedAvg = nfCreatedAvg
+        self.nfDeletedAvg = nfDeletedAvg
+        self.nfMovedAvg = nfMovedAvg
+        self.nfModifiedAvg = nfModifiedAvg
+        self.nfCreatedLatest = nfCreatedLatest
+        self.nfDeletedLatest = nfDeletedLatest
+        self.nfMovedLatest = nfMovedLatest
+        self.nfModifiedLatest = nfModifiedLatest
         self.hostname = hostname
         self.directory = dir
         self.nfFiles = nfFiles
         return super().__init__(*args, **kwargs)
     def __str__(self):
-        return "msg: host=%s, dir=%s, nfFiles=%s, nfCreated=%s, nfDeleted=%s, nfMoved=%s, nfModified=%s" \
-            %(self.hostname, self.directory, self.nfFiles, self.nfCreated, self.nfDeleted, self.nfMoved, self.nfModified)
+        return """\
+msg: host=%s, dir=%s, nfFiles=%s, 
+nfCreatedAvg=%s, nfDeletedAvg=%s, nfMovedAvg=%s, nfModifiedAvg=%s
+nfCreatedLatest=%s, nfDeletedLatest=%s, nfMovedLatest=%s, nfModifiedLatest=%s""" \
+        %(self.hostname, self.directory, self.nfFiles, \
+        self.nfCreatedAvg, self.nfDeletedAvg, self.nfMovedAvg, self.nfModifiedAvg, \
+        self.nfCreatedLatest, self.nfDeletedLatest, self.nfMovedLatest, self.nfModifiedLatest\
+        )
     def getStats(self):
-        return self.nfCreated, self.nfDeleted, self.nfMoved, self.nfModified
+        return self.nfCreatedAvg, self.nfDeletedAvg, self.nfMovedAvg, self.nfModifiedAvg, \
+               self.nfCreatedLatest, self.nfDeletedLatest, self.nfMovedLatest, self.nfModifiedLatest
 
