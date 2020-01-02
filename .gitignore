@@ -5,3 +5,6 @@
 /EnterpriseFileMonitor/agent/*.bak2
 /EnterpriseFileMonitor/agent/*.bak3
 /EnterpriseFileMonitor/messages/__pycache__/*.pyc
+/EnterpriseFileMonitor/build
+/EnterpriseFileMonitor/dist
+/EnterpriseFileMonitor/testdir
