@@ -9,6 +9,7 @@
 #    Dec 30, 2019 01:35:02 PM CET  platform: Windows NT
 
 import sys
+import argparse
 
 try:
     import Tkinter as tk
@@ -109,9 +110,12 @@ def set_Tk_var():
     global sendToAddress
     sendToAddress = tk.StringVar()
 
-def selectDirectory():
+def selectDirectory(theDirectory=""):
     global g_observer
-    dir = tkinter.filedialog.askdirectory()
+    if not theDirectory:
+        dir = tkinter.filedialog.askdirectory()
+    else:
+        dir = theDirectory
     g_w.DirectoryEntryLabel['text'] = dir
     nfFiles = getNumberOfFiles(dir)
     g_w.NumberOfFilesLabel['text'] = str(nfFiles)
@@ -160,7 +164,18 @@ def init(top, gui, *args, **kwargs):
     g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     g_root.after(G_INTERVAL, secondsTick, g_root)
-    
+
+    #check for startup parameters
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-d", "--directory", type=str, help="directory to be monitored", default = "")
+    parser.add_argument("-m", "--manager", type=str, help="adress of manager", default = "127.0.0.1")
+    args = parser.parse_args()
+    if args.manager:
+        sendToAddress.set(args.manager)
+    if args.directory:
+        g_w.selectDirectoryButton.config(state = tk.DISABLED)
+        selectDirectory(args.directory)
+ 
 def destroy_window():
     # Function which closes the window.
     global g_top_level
