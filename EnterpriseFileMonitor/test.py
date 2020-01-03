@@ -36,25 +36,14 @@ class Test(unittest.TestCase):
         os.mkdir("./testdir")
         shutil.copy("./dist/EnterpriseFileMonitorAgent.exe", "./testdir/EnterpriseFileMonitorAgent.exe")
         self.testDir = os.path.join(os.path.dirname(__file__), ".\\testdir")
-        self.p = subprocess.Popen([".\\testdir\\EnterpriseFileMonitorAgent.exe","--directory=%s" %self.testDir])
+        self.p = subprocess.Popen([".\\testdir\\EnterpriseFileMonitorAgent.exe","--directory=%s" %self.testDir, "--interval=2"])
 
     def tearDown(self):
         self.sendSocket.close()
         kill_proc_tree(self.p.pid)
         self.p.wait()
-        
-    def test_hello(self):
-        #after startup with command line parameters specifying the manager address
-        #first message should be a message of type messages.HelloMessage.
-        msg = pickle.loads(self.sendSocket.recv(1024))
-        self.assertTrue(isinstance(msg, messages.HelloMessage))
-        self.assertEqual(msg.hostName, socket.gethostname())
 
-    def test_nochanges(self):
-        #after startup, check if message is sent with zero changes.
-        msg = pickle.loads(self.sendSocket.recv(1024))
-        self.assertTrue(isinstance(msg, messages.HelloMessage))
-        self.assertEqual(msg.hostName, socket.gethostname())
+    def helperCheckZero(self):
         msg = pickle.loads(self.sendSocket.recv(1024))
         self.assertTrue(isinstance(msg, messages.InterchangeMessage))
         self.assertEqual(msg.directory, self.testDir)
@@ -68,6 +57,38 @@ class Test(unittest.TestCase):
         self.assertEqual(msg.nfDeletedAvg, 0)
         self.assertEqual(msg.nfMovedAvg, 0)
         self.assertEqual(msg.nfModifiedAvg, 0)
+        
+    def test_hello(self):
+        #after startup with command line parameters specifying the manager address
+        #first message should be a message of type messages.HelloMessage.
+        msg = pickle.loads(self.sendSocket.recv(1024))
+        self.assertTrue(isinstance(msg, messages.HelloMessage))
+        self.assertEqual(msg.hostName, socket.gethostname())
 
+    def test_zero(self):
+        #after startup, check if message is sent with zero changes.
+        self.test_hello()
+        self.helperCheckZero()
+
+    def test_2(self):
+        #check detection of creation of one file
+        self.test_zero()
+        self.helperCheckZero()
+        f = open(os.path.join(self.testDir, "testfile.txt"), "wb")
+        f.close()
+        msg = pickle.loads(self.sendSocket.recv(1024))
+        self.assertTrue(isinstance(msg, messages.InterchangeMessage))
+        self.assertEqual(msg.directory, self.testDir)
+        self.assertEqual(msg.nfFiles, 1)
+        self.assertEqual(msg.hostname, socket.gethostname())
+        self.assertEqual(msg.nfCreatedLatest, 1)
+        self.assertEqual(msg.nfDeletedLatest, 0)
+        self.assertEqual(msg.nfMovedLatest, 0)
+        self.assertEqual(msg.nfModifiedLatest, 0)
+        self.assertEqual(msg.nfCreatedAvg, 0)
+        self.assertEqual(msg.nfDeletedAvg, 0)
+        self.assertEqual(msg.nfMovedAvg, 0)
+        self.assertEqual(msg.nfModifiedAvg, 0)
+   
 if __name__ == "__main__":
     unittest.main()

@@ -33,7 +33,7 @@ import messages
 import socket
 import pickle
 
-G_INTERVAL=10*1000 #milliseconds
+G_DEFAULTINTERVAL=10#Seconds
 
 class dirStatistics(watchdog.events.FileSystemEventHandler):
     def __init__(self, *args, history_periods = 24*60*60, **kwargs):
@@ -152,22 +152,22 @@ def secondsTick(root):
         except OSError:
             g_w.MessageLabel['text'] = "Error in address, cannot send to master."
             g_w.MessageLabel['foreground'] ="#ff0000"
-    root.after(G_INTERVAL, secondsTick, root)
+    root.after(G_DEFAULTINTERVAL*1000, secondsTick, root)
 
 def init(top, gui, *args, **kwargs):
-    global g_w, g_top_level, g_root, g_sendSocket
+    global g_w, g_top_level, g_root, g_sendSocket, G_DEFAULTINTERVAL
     g_w = gui
     g_top_level = top
     g_root = top
     g_sendSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     g_sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    g_root.after(G_INTERVAL, secondsTick, g_root)
 
     #check for startup parameters
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--directory", type=str, help="directory to be monitored", default = "")
     parser.add_argument("-m", "--manager", type=str, help="adress of manager", default = "127.0.0.1")
+    parser.add_argument("-i", "--interval", type=int, help="interval in seconds", default=G_DEFAULTINTERVAL)
     args = parser.parse_args()
     if args.manager:
         sendToAddress.set(args.manager)
@@ -176,6 +176,9 @@ def init(top, gui, *args, **kwargs):
     if args.directory:
         g_w.selectDirectoryButton.config(state = tk.DISABLED)
         selectDirectory(args.directory)
+    G_DEFAULTINTERVAL = args.interval
+    g_root.after(G_DEFAULTINTERVAL*1000, secondsTick, g_root)
+    
  
 def destroy_window():
     # Function which closes the window.
