@@ -76,19 +76,24 @@ class Test(unittest.TestCase):
         self.helperCheckZero()
         f = open(os.path.join(self.testDir, "testfile.txt"), "wb")
         f.close()
-        msg = pickle.loads(self.sendSocket.recv(1024))
-        self.assertTrue(isinstance(msg, messages.InterchangeMessage))
-        self.assertEqual(msg.directory, self.testDir)
-        self.assertEqual(msg.nfFiles, 1)
-        self.assertEqual(msg.hostname, socket.gethostname())
-        self.assertEqual(msg.nfCreatedLatest, 1)
-        self.assertEqual(msg.nfDeletedLatest, 0)
-        self.assertEqual(msg.nfMovedLatest, 0)
-        self.assertEqual(msg.nfModifiedLatest, 0)
-        self.assertEqual(msg.nfCreatedAvg, 0)
-        self.assertEqual(msg.nfDeletedAvg, 0)
-        self.assertEqual(msg.nfMovedAvg, 0)
-        self.assertEqual(msg.nfModifiedAvg, 0)
+        while True:
+            try:
+                msg = pickle.loads(self.sendSocket.recv(1024))
+                self.assertTrue(isinstance(msg, messages.InterchangeMessage))
+                self.assertEqual(msg.directory, self.testDir)
+                self.assertEqual(msg.nfFiles, 1)
+                self.assertEqual(msg.hostname, socket.gethostname())
+                self.assertEqual(msg.nfCreatedLatest, 1)
+                self.assertEqual(msg.nfDeletedLatest, 0)
+                self.assertEqual(msg.nfMovedLatest, 0)
+                self.assertEqual(msg.nfModifiedLatest, 0)
+                self.assertEqual(msg.nfCreatedAvg, 0)
+                self.assertEqual(msg.nfDeletedAvg, 0)
+                self.assertEqual(msg.nfMovedAvg, 0)
+                self.assertEqual(msg.nfModifiedAvg, 0)
+                break
+            except:
+                pass
    
 if __name__ == "__main__":
     unittest.main()
