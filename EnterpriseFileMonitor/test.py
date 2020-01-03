@@ -35,21 +35,20 @@ class Test(unittest.TestCase):
         shutil.rmtree("./testdir", ignore_errors=True)
         os.mkdir("./testdir")
         shutil.copy("./dist/EnterpriseFileMonitorAgent.exe", "./testdir/EnterpriseFileMonitorAgent.exe")
+        testDir = os.path.join(os.path.dirname(__file__), ".\\testdir")
+        self.p = subprocess.Popen([".\\testdir\\EnterpriseFileMonitorAgent.exe","--directory=%s" %testDir])
 
     def tearDown(self):
         self.sendSocket.close()
+        kill_proc_tree(self.p.pid)
+        self.p.wait()
         
-
     def test_check_hello(self):
         #after startup with command line parameters specifying the manager address
         #first message should be a message of type messages.HelloMessage.
-        testDir = os.path.join(os.path.dirname(__file__), ".\\testdir")
-        p = subprocess.Popen([".\\testdir\\EnterpriseFileMonitorAgent.exe","--directory=%s" %testDir])
         msg = pickle.loads(self.sendSocket.recv(1024))
         self.assertTrue(isinstance(msg, messages.HelloMessage))
         self.assertEqual(msg.hostName, socket.gethostname())
-        kill_proc_tree(p.pid)
-        p.wait()
 
 if __name__ == "__main__":
     unittest.main()
