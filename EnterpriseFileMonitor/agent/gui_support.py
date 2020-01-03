@@ -172,6 +172,8 @@ def init(top, gui, *args, **kwargs):
     args = parser.parse_args()
     if args.manager:
         sendToAddress.set(args.manager)
+        #manager is known, so we send our hello message
+        g_sendSocket.sendto(pickle.dumps(messages.HelloMessage(hostname=socket.gethostname())), (sendToAddress.get(), 1234))
     if args.directory:
         g_w.selectDirectoryButton.config(state = tk.DISABLED)
         selectDirectory(args.directory)

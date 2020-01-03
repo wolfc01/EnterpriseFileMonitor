@@ -1,5 +1,10 @@
 """interchange message class for interchanging messages between agents and the enterprise master"""
 
+class HelloMessage:
+    def __init__(self, *args, hostname="?", **kwargs):
+        self.hostName = hostname
+        return super().__init__(*args, **kwargs)
+
 class interchangeMessage:
     def __init__(self, *args, hostname = "?", dir = "", nfFiles = 0, \
         nfCreatedAvg=0, nfDeletedAvg=0, nfMovedAvg=0, nfModifiedAvg=0, \
