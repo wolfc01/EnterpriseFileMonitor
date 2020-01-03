@@ -134,9 +134,9 @@ def secondsTick(root):
         stats = g_dirStatistics.doStats()
         g_w.AverageChangedLabel['text'] = "created=%s, deleted=%s, moved=%s, modified=%s" %stats[0:4]
         g_w.LatestLabel['text'] = "created=%s, deleted=%s, moved=%s, modified=%s" %stats[4:8]
-        msg = messages.interchangeMessage(hostname="test", \
+        msg = messages.InterchangeMessage(hostname=socket.gethostname(), \
                                           dir=g_w.DirectoryEntryLabel['text'],\
-                                          nfFiles=0,\
+                                          nfFiles=int(g_w.NumberOfFilesLabel['text']),\
                                           nfCreatedAvg=stats[0],\
                                           nfDeletedAvg=stats[1],\
                                           nfMovedAvg=stats[2],\
@@ -145,7 +145,6 @@ def secondsTick(root):
                                           nfDeletedLatest=stats[5],\
                                           nfMovedLatest=stats[6],\
                                           nfModifiedLatest=stats[7])
-        print(msg)
         try:
             g_sendSocket.sendto(pickle.dumps(msg), (sendToAddress.get(), 1234))
             g_w.MessageLabel['text'] = "Successfully sent message"

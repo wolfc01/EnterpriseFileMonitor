@@ -5,7 +5,7 @@ class HelloMessage:
         self.hostName = hostname
         return super().__init__(*args, **kwargs)
 
-class interchangeMessage:
+class InterchangeMessage:
     def __init__(self, *args, hostname = "?", dir = "", nfFiles = 0, \
         nfCreatedAvg=0, nfDeletedAvg=0, nfMovedAvg=0, nfModifiedAvg=0, \
         nfCreatedLatest=0, nfDeletedLatest=0, nfMovedLatest=0, nfModifiedLatest=0, \
