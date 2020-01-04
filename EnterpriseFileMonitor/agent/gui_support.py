@@ -33,7 +33,7 @@ import messages
 import socket
 import pickle
 
-G_DEFAULTINTERVAL=10#Seconds
+G_DEFAULTINTERVAL=messages.C_DEFAULTINTERVAL #Seconds
 
 class dirStatistics(watchdog.events.FileSystemEventHandler):
     def __init__(self, *args, history_periods = 24*60*60, **kwargs):

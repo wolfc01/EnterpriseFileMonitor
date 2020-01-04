@@ -3,6 +3,9 @@
 C_REPORTPORT=1235
 C_AGENTREPORTPROC=1234
 
+C_DEFAULTINTERVAL=10
+C_DEFAULTTIMEOUTFACTOR=10 #after C_DEFAULTTIMEOUTFACTOR*C_DEFAULTINTERVAL it is assumed agent is lost
+
 class HelloMessage:
     def __init__(self, *args, hostname="?", **kwargs):
         self.hostName = hostname
