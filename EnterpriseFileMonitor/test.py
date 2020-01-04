@@ -31,7 +31,7 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.recvSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self.recvSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.recvSocket.bind(("127.0.0.1", 1234))
+        self.recvSocket.bind(("127.0.0.1", messages.C_AGENTREPORTPROC))
         shutil.rmtree("./testdir", ignore_errors=True)
         os.mkdir("./testdir")
         shutil.copy("./dist/EnterpriseFileMonitorAgent.exe", "./testdir/EnterpriseFileMonitorAgent.exe")

@@ -146,7 +146,7 @@ def secondsTick(root):
                                           nfMovedLatest=stats[6],\
                                           nfModifiedLatest=stats[7])
         try:
-            g_sendSocket.sendto(pickle.dumps(msg), (sendToAddress.get(), 1234))
+            g_sendSocket.sendto(pickle.dumps(msg), (sendToAddress.get(), messages.C_AGENTREPORTPROC))
             g_w.MessageLabel['text'] = "Successfully sent message"
             g_w.MessageLabel['foreground'] ="#000000"
         except OSError:
@@ -172,7 +172,7 @@ def init(top, gui, *args, **kwargs):
     if args.manager:
         sendToAddress.set(args.manager)
         #manager is known, so we send our hello message
-        g_sendSocket.sendto(pickle.dumps(messages.HelloMessage(hostname=socket.gethostname())), (sendToAddress.get(), 1234))
+        g_sendSocket.sendto(pickle.dumps(messages.HelloMessage(hostname=socket.gethostname())), (sendToAddress.get(), messages.C_AGENTREPORTPROC))
     if args.directory:
         g_w.selectDirectoryButton.config(state = tk.DISABLED)
         selectDirectory(args.directory)

@@ -1,5 +1,8 @@
 """interchange message class for interchanging messages between agents and the enterprise master"""
 
+C_REPORTPORT=1235
+C_AGENTREPORTPROC=1234
+
 class HelloMessage:
     def __init__(self, *args, hostname="?", **kwargs):
         self.hostName = hostname
@@ -34,4 +37,18 @@ nfCreatedLatest=%s, nfDeletedLatest=%s, nfMovedLatest=%s, nfModifiedLatest=%s"""
     def getStats(self):
         return self.nfCreatedAvg, self.nfDeletedAvg, self.nfMovedAvg, self.nfModifiedAvg, \
                self.nfCreatedLatest, self.nfDeletedLatest, self.nfMovedLatest, self.nfModifiedLatest
+
+class _ReportMessageBase:
+    def __init__(self, *args, hostname="?", thedir="", message="<>", **kwargs):
+        self.hostName = hostname
+        self.thedir = thedir
+        self.message = message
+class HostDirLostEvent(_ReportMessageBase):
+    pass
+class NewHostDirEvent(_ReportMessageBase):
+    pass
+class AnomalyEvent(_ReportMessageBase):
+    pass
+
+
 
