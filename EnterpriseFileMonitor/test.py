@@ -29,9 +29,9 @@ class Test(unittest.TestCase):
         p = subprocess.check_call("pyinstaller -F ./EnterpriseFileMonitorAgent.py -p %s" %agentDir, shell=True)
 
     def setUp(self):
-        self.sendSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        self.sendSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.sendSocket.bind(("127.0.0.1", 1234))
+        self.recvSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.recvSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.recvSocket.bind(("127.0.0.1", 1234))
         shutil.rmtree("./testdir", ignore_errors=True)
         os.mkdir("./testdir")
         shutil.copy("./dist/EnterpriseFileMonitorAgent.exe", "./testdir/EnterpriseFileMonitorAgent.exe")
@@ -39,12 +39,12 @@ class Test(unittest.TestCase):
         self.p = subprocess.Popen([".\\testdir\\EnterpriseFileMonitorAgent.exe","--directory=%s" %self.testDir, "--interval=2"])
 
     def tearDown(self):
-        self.sendSocket.close()
+        self.recvSocket.close()
         kill_proc_tree(self.p.pid)
         self.p.wait()
 
     def helperCheckZero(self):
-        msg = pickle.loads(self.sendSocket.recv(1024))
+        msg = pickle.loads(self.recvSocket.recv(1024))
         self.helperTests(msg, self.testDir, socket.gethostname(), 1)
         self.assertEqual(msg.nfCreatedLatest, 0)
         self.assertEqual(msg.nfDeletedLatest, 0)
@@ -65,7 +65,7 @@ class Test(unittest.TestCase):
     def test_hello(self):
         #after startup with command line parameters specifying the manager address
         #first message should be a message of type messages.HelloMessage.
-        msg = pickle.loads(self.sendSocket.recv(1024))
+        msg = pickle.loads(self.recvSocket.recv(1024))
         self.assertTrue(isinstance(msg, messages.HelloMessage))
         self.assertEqual(msg.hostName, socket.gethostname())
 
@@ -82,7 +82,7 @@ class Test(unittest.TestCase):
         f.close()
         while True:
             try:
-                msg = pickle.loads(self.sendSocket.recv(1024))
+                msg = pickle.loads(self.recvSocket.recv(1024))
                 self.helperTests(msg, self.testDir, socket.gethostname(), 1)
                 self.assertEqual(msg.nfCreatedLatest, 1)
                 self.assertEqual(msg.nfDeletedLatest, 0)
@@ -100,7 +100,7 @@ class Test(unittest.TestCase):
         f.close()
         while True:
             try:
-                msg = pickle.loads(self.sendSocket.recv(1024))
+                msg = pickle.loads(self.recvSocket.recv(1024))
                 self.helperTests(msg, self.testDir, socket.gethostname(), 1)
                 self.assertEqual(msg.nfCreatedLatest, 0)
                 self.assertEqual(msg.nfDeletedLatest, 0)
@@ -115,7 +115,7 @@ class Test(unittest.TestCase):
         os.remove(os.path.join(self.testDir, "testfile.txt"))
         while True:
             try:
-                msg = pickle.loads(self.sendSocket.recv(1024))
+                msg = pickle.loads(self.recvSocket.recv(1024))
                 self.helperTests(msg, self.testDir, socket.gethostname(), 1)
                 self.assertEqual(msg.nfCreatedLatest, 0)
                 self.assertEqual(msg.nfDeletedLatest, 1)
@@ -131,7 +131,7 @@ class Test(unittest.TestCase):
         os.rename(os.path.join(self.testDir, "testfile.txt"), os.path.join(self.testDir, "testfilerenamed.txt"))
         while True:
             try:
-                msg = pickle.loads(self.sendSocket.recv(1024))
+                msg = pickle.loads(self.recvSocket.recv(1024))
                 self.helperTests(msg, self.testDir, socket.gethostname(), 1)
                 self.assertEqual(msg.nfCreatedLatest, 0)
                 self.assertEqual(msg.nfDeletedLatest, 0)
@@ -149,7 +149,7 @@ class Test(unittest.TestCase):
         for i in range(NFFILES):
             f = open(os.path.join(self.testDir, "testfile%s.txt" %i), "w")
             f.close()
-        msg = pickle.loads(self.sendSocket.recv(1024))
+        msg = pickle.loads(self.recvSocket.recv(1024))
         self.helperTests(msg, self.testDir, socket.gethostname(), 1)
         self.assertEqual(msg.nfCreatedLatest, NFFILES)
         self.assertEqual(msg.nfDeletedLatest, 0)
@@ -157,7 +157,7 @@ class Test(unittest.TestCase):
         self.assertEqual(msg.nfModifiedLatest, 0)
 
         #wait for a message with zero count
-        msg = pickle.loads(self.sendSocket.recv(1024))
+        msg = pickle.loads(self.recvSocket.recv(1024))
         self.helperTests(msg, self.testDir, socket.gethostname(), 1)
         self.assertEqual(msg.nfCreatedLatest, 0)
         self.assertEqual(msg.nfDeletedLatest, 0)
@@ -172,7 +172,7 @@ class Test(unittest.TestCase):
         countedFiles = 0
         #UDP messages will be queued is the assumption here
         while True:
-            msg = pickle.loads(self.sendSocket.recv(1024))
+            msg = pickle.loads(self.recvSocket.recv(1024))
             countedFiles += msg.nfCreatedLatest
             if msg.nfCreatedLatest == 0:
                 break
