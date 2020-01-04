@@ -141,5 +141,42 @@ class Test(unittest.TestCase):
             except:
                 pass
 
+    def test_multipleFilesCreation(self):
+        """creation of multiple files: check counting"""
+        NFFILES=100
+        self.test_zero()
+        self.helperCheckZero()
+        for i in range(NFFILES):
+            f = open(os.path.join(self.testDir, "testfile%s.txt" %i), "w")
+            f.close()
+        msg = pickle.loads(self.sendSocket.recv(1024))
+        self.helperTests(msg, self.testDir, socket.gethostname(), 1)
+        self.assertEqual(msg.nfCreatedLatest, NFFILES)
+        self.assertEqual(msg.nfDeletedLatest, 0)
+        self.assertEqual(msg.nfMovedLatest, 0)
+        self.assertEqual(msg.nfModifiedLatest, 0)
+
+        #wait for a message with zero count
+        msg = pickle.loads(self.sendSocket.recv(1024))
+        self.helperTests(msg, self.testDir, socket.gethostname(), 1)
+        self.assertEqual(msg.nfCreatedLatest, 0)
+        self.assertEqual(msg.nfDeletedLatest, 0)
+        self.assertEqual(msg.nfMovedLatest, 0)
+        self.assertEqual(msg.nfModifiedLatest, 0)
+
+        #check counting of files in multiple messages sent
+        for i in range(NFFILES):
+            f = open(os.path.join(self.testDir, "extrafiles%s.txt" %i), "w")
+            f.close()
+            time.sleep(0.1)
+        countedFiles = 0
+        #UDP messages will be queued is the assumption here
+        while True:
+            msg = pickle.loads(self.sendSocket.recv(1024))
+            countedFiles += msg.nfCreatedLatest
+            if msg.nfCreatedLatest == 0:
+                break
+        self.assertEqual(countedFiles, NFFILES)
+
 if __name__ == "__main__":
     unittest.main()
