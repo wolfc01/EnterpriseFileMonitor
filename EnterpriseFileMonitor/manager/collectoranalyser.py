@@ -37,11 +37,12 @@ class Collector():
     """a single instance of thos class collects messages from all agents and creates one HostDirAnalyser object 
        for each agent sending update messages"""
     def __init__(self, *args, recport=messages.C_REPORTPORT, reportport=messages.C_AGENTREPORTPROC, **kwargs):
-        self._recvSocket = socket.socket(('', recport))
+        self._recvSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self._recvSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._recvSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self._recvSocket.bind(("",reportport))
         self._recvSocket.setblocking(False)
-        self._reportSocket = socket.socket(('127.0.0.1', reportport))
+        self._reportSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         self._reportSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._reportSocket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
         self._hostDirAnalysers = {}
@@ -80,14 +81,15 @@ class Collector():
                             self._hostDirAnalysers[(msg.hostname, msg.directory)].update(msg)
     def run(self):
         self._guardThread = threading.Thread(target=self._guard)
-        self._guardThread.run()
+        self._guardThread.start()
         self._runThread = threading.Thread(target=self._run)
-        self._runThread.run()
+        self._runThread.start()
 
     def stop(self):
         self._stop = True
         self._guardThread.join()
         self._runThread.join()
-
+        self._recvSocket.close()
+        self._reportSocket.close()
 
 

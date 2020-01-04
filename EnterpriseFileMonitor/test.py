@@ -8,6 +8,7 @@ import pickle
 import time
 import psutil
 import messages
+import manager.collectoranalyser
 
 def kill_proc_tree(pid, including_parent=True):    
     parent = psutil.Process(pid)
@@ -19,7 +20,7 @@ def kill_proc_tree(pid, including_parent=True):
         parent.kill()
         parent.wait(5)
 
-class Test(unittest.TestCase):
+class AgentTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         #generate file monitor executable for testing
@@ -178,5 +179,14 @@ class Test(unittest.TestCase):
                 break
         self.assertEqual(countedFiles, NFFILES)
 
+class ManagerTest(unittest.TestCase):
+    pass
+
+    def testA(self):
+        #test if collector can be started and stopped
+        collector = manager.collectoranalyser.Collector()
+        collector.run()
+        collector.stop()
+
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
