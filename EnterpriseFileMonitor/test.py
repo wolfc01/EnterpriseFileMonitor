@@ -1,4 +1,4 @@
-#test the Enterprise File Monitor
+#CI: test the Enterprise File Monitor
 import unittest
 import subprocess
 import shutil
