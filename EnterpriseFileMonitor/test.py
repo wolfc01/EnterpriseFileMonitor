@@ -9,6 +9,7 @@ import time
 import psutil
 import messages
 import manager.collectoranalyser
+import copy
 
 def kill_proc_tree(pid, including_parent=True):    
     parent = psutil.Process(pid)
@@ -180,13 +181,79 @@ class AgentTest(unittest.TestCase):
         self.assertEqual(countedFiles, NFFILES)
 
 class ManagerTest(unittest.TestCase):
-    pass
+    
+    def setUp(self):
+        """precondition: Agent must be built previously"""
+        self.recvSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        self.recvSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.recvSocket.bind(("127.0.0.1", messages.C_MANAGERREPORTPORT))
+        shutil.rmtree("./testdir", ignore_errors=True)
+        os.mkdir("./testdir")
+        shutil.copy("./dist/EnterpriseFileMonitorAgent.exe", "./testdir/EnterpriseFileMonitorAgent.exe")
+        self.p = {}
+        self.hostName = socket.gethostname()
+       
 
-    def testA(self):
+    def helperCreateDirs(self, dirlist):
+        for thedir in dirlist:
+            abspath = os.path.join(os.path.dirname(__file__), thedir)
+            shutil.rmtree(abspath, ignore_errors=True)
+            os.makedirs(abspath)
+    
+    def helperDelDirs(self, dirlist):
+        for thedir in dirlist:
+            abspath = os.path.join(os.path.dirname(__file__), thedir)
+            shutil.rmtree(abspath)
+
+    def helperStartAgents(self, dirlist):
+        #start a number of agents
+        for thedir in dirlist:
+            subdir = os.path.join(os.path.dirname(__file__), thedir)
+            self.p[thedir] = subprocess.Popen([".\\testdir\\EnterpriseFileMonitorAgent.exe","--directory=%s" %subdir, "--interval=2"])
+    
+    def helperStopAgents(self, dirlist=None):
+        #stop specified agents, if none is specified, stop all.
+        if not dirlist:
+            dirlist=self.p.keys()
+        for thedir in dirlist:
+            kill_proc_tree(self.p[thedir].pid)
+            self.p[thedir].wait()
+    
+    def test_startstop(self):
         #test if collector can be started and stopped
         collector = manager.collectoranalyser.Collector()
         collector.run()
         collector.stop()
 
+    def test_startStopAgents(self):
+        """test starting and stopping of agents, with new agent messages and agent lost messages"""
+        collector = manager.collectoranalyser.Collector(interval=2, timeoutfactor=2)
+        collector.run()
+        dirs = ["testA","testB"]
+        self.helperCreateDirs(dirs)
+        self.helperStartAgents(dirs)
+        deldirs = copy.copy(dirs)
+        while True:
+            msg = pickle.loads(self.recvSocket.recv(1024))
+            self.assertIsInstance(msg, messages.NewAgentEvent)
+            for adir in list(deldirs):
+                if msg.directory.endswith(adir):
+                    deldirs.remove(adir)
+            if not deldirs:
+                break
+        self.helperStopAgents()
+        self.helperDelDirs(dirs)
+        deldirs = copy.copy(dirs)
+        while True:
+            msg = pickle.loads(self.recvSocket.recv(1024))
+            self.assertIsInstance(msg, messages.AgentLostEvent)
+            for adir in list(deldirs):
+                if msg.directory.endswith(adir):
+                    deldirs.remove(adir)
+            if not deldirs:
+                break
+        collector.stop()
+
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    suite = unittest.TestLoader().loadTestsFromNames(["test.AgentTest","test.ManagerTest"])
+    unittest.TextTestRunner(verbosity=3).run( suite )

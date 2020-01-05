@@ -1,10 +1,10 @@
 """interchange message class for interchanging messages between agents and the enterprise master"""
 
-C_REPORTPORT=1235
+C_MANAGERREPORTPORT=1235
 C_AGENTREPORTPROC=1234
 
 C_DEFAULTINTERVAL=10
-C_DEFAULTTIMEOUTFACTOR=10 #after C_DEFAULTTIMEOUTFACTOR*C_DEFAULTINTERVAL it is assumed agent is lost
+C_DEFAULTTIMEOUTFACTOR=3 #after C_DEFAULTTIMEOUTFACTOR*C_DEFAULTINTERVAL it is assumed agent is lost
 
 class HelloMessage:
     def __init__(self, *args, hostname="?", **kwargs):
@@ -42,13 +42,13 @@ nfCreatedLatest=%s, nfDeletedLatest=%s, nfMovedLatest=%s, nfModifiedLatest=%s"""
                self.nfCreatedLatest, self.nfDeletedLatest, self.nfMovedLatest, self.nfModifiedLatest
 
 class _ReportMessageBase:
-    def __init__(self, *args, hostname="?", thedir="", message="<>", **kwargs):
+    def __init__(self, *args, hostname="?", directory="", message="<>", **kwargs):
         self.hostName = hostname
-        self.thedir = thedir
+        self.directory = directory
         self.message = message
-class HostDirLostEvent(_ReportMessageBase):
+class AgentLostEvent(_ReportMessageBase):
     pass
-class NewHostDirEvent(_ReportMessageBase):
+class NewAgentEvent(_ReportMessageBase):
     pass
 class AnomalyEvent(_ReportMessageBase):
     pass
